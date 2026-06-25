@@ -1,0 +1,1891 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Goods Receipt POC Demo Deck</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* === THEME TOKENS === */
+      :root {
+        --stage-bg: #191919;
+        --slide-bg: #f6f5f4;
+        --canvas: #f6f5f4;
+        --surface: #ffffff;
+        --ink: #000000;
+        --ink-soft: #31302e;
+        --ink-muted: #615d59;
+        --ink-faint: #a39e98;
+        --hairline: #e6e6e6;
+        --primary: #0075de;
+        --primary-active: #005bab;
+        --secondary: #213183;
+        --sky: #62aef0;
+        --purple: #d6b6f6;
+        --pink: #ff64c8;
+        --orange: #dd5b00;
+        --teal: #2a9d99;
+        --green: #1aae39;
+        --shadow-soft:
+          0 0.175px 1.041px rgba(0, 0, 0, 0.01),
+          0 0.8px 2.925px rgba(0, 0, 0, 0.02),
+          0 2.025px 7.847px rgba(0, 0, 0, 0.027), 0 4px 18px rgba(0, 0, 0, 0.04);
+        --font-body: "Inter", sans-serif;
+        --ease: cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      /* === RESET === */
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* ===========================================
+           FIXED 16:9 STAGE: MANDATORY BASE STYLES
+           Include this ENTIRE file in every presentation.
+           Slides are authored at 1920x1080 and scaled as a whole.
+           =========================================== */
+
+      /* 1. Lock the browser viewport */
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: var(--stage-bg, #000);
+      }
+
+      /* 2. Full-window deck viewport */
+      .deck-viewport {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        background: var(--stage-bg, #000);
+      }
+
+      /* 3. Fixed 16:9 design canvas.
+           JavaScript sets transform: translate(...) scale(...). */
+      .deck-stage {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        transform-origin: 0 0;
+        background: var(--slide-bg, #fff);
+      }
+
+      /* 4. Slides stack inside the fixed stage.
+           Content must be laid out at 1920x1080, not reflowed per device. */
+      .slide {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        display: block;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        background: var(--slide-bg, #fff);
+      }
+
+      .slide.active,
+      .slide.visible {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+        z-index: 1;
+      }
+
+      /* 5. Keep media inside authored slide bounds */
+      img,
+      video,
+      canvas,
+      svg {
+        max-width: 100%;
+        max-height: 100%;
+      }
+
+      /* 6. Presentation chrome stays outside the slide design system */
+      .deck-controls {
+        position: fixed;
+        left: 50%;
+        bottom: 22px;
+        transform: translateX(-50%);
+        z-index: 1000;
+      }
+
+      /* 7. Print one fixed-size slide per page */
+      @media print {
+        html,
+        body {
+          width: 1920px;
+          height: auto;
+          overflow: visible;
+          background: #fff;
+        }
+
+        .deck-viewport {
+          position: static;
+          overflow: visible;
+          background: #fff;
+        }
+
+        .deck-stage {
+          position: static;
+          width: auto;
+          height: auto;
+          transform: none !important;
+          background: none;
+        }
+
+        .slide {
+          position: relative;
+          display: block !important;
+          visibility: visible !important;
+          opacity: 1 !important;
+          pointer-events: auto !important;
+          width: 1920px;
+          height: 1080px;
+          break-after: page;
+          page-break-after: always;
+        }
+
+        .slide:last-child {
+          break-after: auto;
+          page-break-after: auto;
+        }
+
+        .deck-controls {
+          display: none !important;
+        }
+      }
+
+      /* 8. Reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.2s !important;
+        }
+      }
+
+      /* === BASE SLIDE SYSTEM === */
+      body {
+        color: var(--ink);
+        font-family: var(--font-body);
+      }
+
+      .slide {
+        padding: 92px 104px 78px;
+      }
+
+      .slide::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+        background-size: 48px 48px;
+        opacity: 0.44;
+        pointer-events: none;
+      }
+
+      .slide > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .slide-kicker {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        color: var(--primary);
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 28px;
+      }
+
+      .slide-kicker::before {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: var(--primary);
+      }
+
+      h1,
+      h2,
+      h3,
+      p,
+      li,
+      div {
+        letter-spacing: 0;
+      }
+
+      h1 {
+        font-size: 110px;
+        font-weight: 800;
+        line-height: 0.96;
+        max-width: 1130px;
+      }
+
+      h2 {
+        font-size: 74px;
+        font-weight: 800;
+        line-height: 1.02;
+        max-width: 1260px;
+      }
+
+      h3 {
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1.15;
+      }
+
+      p,
+      li {
+        color: var(--ink-soft);
+        font-size: 29px;
+        line-height: 1.34;
+      }
+
+      ul {
+        list-style: none;
+      }
+
+      li {
+        position: relative;
+        padding-left: 34px;
+        margin-top: 20px;
+      }
+
+      li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 16px;
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--primary);
+      }
+
+      .lead {
+        color: var(--ink-soft);
+        font-size: 36px;
+        line-height: 1.25;
+        max-width: 900px;
+      }
+
+      .muted {
+        color: var(--ink-muted);
+      }
+
+      .tiny {
+        color: var(--ink-muted);
+        font-size: 18px;
+        line-height: 1.25;
+      }
+
+      .page-number {
+        position: absolute;
+        right: 104px;
+        bottom: 66px;
+        color: var(--ink-faint);
+        font-size: 18px;
+        font-weight: 700;
+        z-index: 2;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        border: 1px solid var(--hairline);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--primary);
+        font-size: 18px;
+        font-weight: 800;
+        line-height: 1;
+        padding: 10px 15px;
+      }
+
+      .pill {
+        border: 1px solid var(--hairline);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--ink-soft);
+        font-size: 22px;
+        font-weight: 700;
+        padding: 15px 22px;
+        box-shadow: var(--shadow-soft);
+        white-space: nowrap;
+      }
+
+      .blue-fill {
+        border-color: var(--primary);
+        background: var(--primary);
+        color: #ffffff;
+      }
+
+      .card {
+        border: 1px solid var(--hairline);
+        border-radius: 12px;
+        background: var(--surface);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .sticker {
+        position: absolute;
+        border: 2px solid rgba(0, 0, 0, 0.08);
+        border-radius: 14px;
+        box-shadow: var(--shadow-soft);
+        z-index: 0;
+      }
+
+      .sticker.round {
+        border-radius: 999px;
+      }
+
+      .sticker.sky {
+        background: var(--sky);
+      }
+      .sticker.purple {
+        background: var(--purple);
+      }
+      .sticker.pink {
+        background: var(--pink);
+      }
+      .sticker.orange {
+        background: var(--orange);
+      }
+      .sticker.teal {
+        background: var(--teal);
+      }
+      .sticker.green {
+        background: var(--green);
+      }
+
+      /* === REVEAL ANIMATIONS === */
+      .reveal {
+        opacity: 0;
+        transform: translateY(26px);
+        transition:
+          opacity 0.55s var(--ease),
+          transform 0.55s var(--ease);
+      }
+
+      .slide.visible .reveal {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .reveal:nth-child(1) {
+        transition-delay: 0.05s;
+      }
+      .reveal:nth-child(2) {
+        transition-delay: 0.12s;
+      }
+      .reveal:nth-child(3) {
+        transition-delay: 0.19s;
+      }
+      .reveal:nth-child(4) {
+        transition-delay: 0.26s;
+      }
+      .reveal:nth-child(5) {
+        transition-delay: 0.33s;
+      }
+      .reveal:nth-child(6) {
+        transition-delay: 0.4s;
+      }
+
+      /* === SLIDE 1: BUSINESS PROBLEM === */
+      .hero-slide {
+        background: var(--secondary);
+        color: #ffffff;
+      }
+
+      .hero-slide::before {
+        background-image:
+          radial-gradient(
+            circle at 18% 20%,
+            rgba(255, 255, 255, 0.16) 0 2px,
+            transparent 3px
+          ),
+          radial-gradient(
+            circle at 80% 72%,
+            rgba(255, 255, 255, 0.18) 0 2px,
+            transparent 3px
+          ),
+          linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        background-size:
+          220px 220px,
+          190px 190px,
+          64px 64px,
+          64px 64px;
+        opacity: 0.8;
+      }
+
+      .hero-slide .slide-kicker,
+      .hero-slide .lead,
+      .hero-slide p,
+      .hero-slide li {
+        color: #ffffff;
+      }
+
+      .hero-slide .slide-kicker::before {
+        background: #ffffff;
+      }
+
+      .hero-layout {
+        display: grid;
+        grid-template-columns: 1.03fr 0.77fr;
+        gap: 86px;
+        align-items: end;
+        height: 770px;
+      }
+
+      .hero-panel {
+        padding: 38px 42px 40px;
+        border-color: rgba(255, 255, 255, 0.38);
+        background: rgba(255, 255, 255, 0.96);
+      }
+
+      .hero-panel h3 {
+        color: var(--ink);
+        margin-bottom: 18px;
+      }
+
+      .hero-panel li {
+        color: var(--ink-soft);
+        font-size: 27px;
+      }
+
+      .hero-panel li::before {
+        background: var(--primary);
+      }
+
+      .hero-slide .page-number {
+        color: rgba(255, 255, 255, 0.7);
+      }
+
+      /* === SLIDE 2: OBJECTIVES === */
+      .objective-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 22px;
+        margin-top: 62px;
+      }
+
+      .objective-card {
+        min-height: 300px;
+        padding: 30px;
+      }
+
+      .objective-card .num {
+        color: var(--primary);
+        font-size: 24px;
+        font-weight: 800;
+        margin-bottom: 34px;
+      }
+
+      .objective-card p {
+        margin-top: 16px;
+        font-size: 24px;
+      }
+
+      .deadline-strip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 40px;
+        padding: 26px 32px;
+        border: 1px solid var(--hairline);
+        border-radius: 12px;
+        background: var(--surface);
+      }
+
+      .deadline-strip strong {
+        color: var(--primary);
+        font-size: 34px;
+      }
+
+      /* === SLIDE 3: CORE USER FLOW === */
+      .flow-track {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 16px;
+        margin-top: 66px;
+      }
+
+      .flow-step {
+        min-height: 390px;
+        padding: 24px;
+        border: 1px solid var(--hairline);
+        border-radius: 12px;
+        background: var(--surface);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .step-index {
+        display: grid;
+        place-items: center;
+        width: 52px;
+        height: 52px;
+        margin-bottom: 28px;
+        border-radius: 999px;
+        background: var(--primary);
+        color: #ffffff;
+        font-size: 22px;
+        font-weight: 800;
+      }
+
+      .step-title {
+        color: var(--ink);
+        font-size: 28px;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 16px;
+      }
+
+      .step-copy {
+        color: var(--ink-muted);
+        font-size: 22px;
+        line-height: 1.28;
+      }
+
+      .field-row {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-top: 40px;
+      }
+
+      /* === SLIDE 4: CHATBOT === */
+      .mode-layout {
+        display: grid;
+        grid-template-columns: 0.9fr 0.9fr;
+        gap: 58px;
+        margin-top: 42px;
+        align-items: stretch;
+      }
+
+      .chat-window {
+        padding: 28px;
+        background: #ebe9ff;
+      }
+
+      .chat-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 26px;
+        color: var(--ink-muted);
+        font-size: 21px;
+        font-weight: 700;
+      }
+
+      .teams-mark {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        background: #6264a7;
+        color: #ffffff;
+        font-weight: 800;
+      }
+
+      .bubble {
+        width: fit-content;
+        max-width: 680px;
+        margin-top: 18px;
+        padding: 18px 22px;
+        border-radius: 12px;
+        background: var(--surface);
+        color: var(--ink-soft);
+        font-size: 25px;
+        line-height: 1.28;
+      }
+
+      .bubble.user {
+        margin-left: auto;
+        background: var(--primary);
+        color: #ffffff;
+      }
+
+      .adaptive-card {
+        margin-top: 20px;
+        padding: 22px;
+        border: 1px solid var(--hairline);
+        border-radius: 12px;
+        background: var(--surface);
+      }
+
+      .adaptive-card h3 {
+        font-size: 28px;
+        margin-bottom: 16px;
+      }
+
+      .mini-field {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 12px;
+        padding: 10px 0;
+        border-top: 1px solid var(--hairline);
+        font-size: 20px;
+      }
+
+      .mini-label {
+        color: var(--ink-muted);
+        font-weight: 700;
+      }
+
+      .mode-notes {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+      }
+
+      .note-card {
+        padding: 26px 30px;
+      }
+
+      .note-card h3 {
+        margin-bottom: 14px;
+      }
+
+      .note-card p {
+        font-size: 25px;
+      }
+
+      .note-card li {
+        margin-top: 12px;
+        padding-left: 28px;
+        font-size: 23px;
+        line-height: 1.25;
+      }
+
+      .note-card li::before {
+        top: 12px;
+        width: 8px;
+        height: 8px;
+      }
+
+      /* === SLIDE 5: LOW CODE === */
+      .app-shell {
+        display: grid;
+        grid-template-columns: 270px 1fr;
+        overflow: hidden;
+        min-height: 560px;
+        margin-top: 48px;
+      }
+
+      .mode-layout .app-shell,
+      .mode-layout .document-preview {
+        min-height: 560px;
+        margin-top: 0;
+      }
+
+      .mode-layout .app-shell {
+        grid-template-columns: 210px 1fr;
+      }
+
+      .app-nav {
+        padding: 28px;
+        border-right: 1px solid var(--hairline);
+        background: #fbfaf9;
+      }
+
+      .nav-item {
+        margin-bottom: 13px;
+        padding: 15px 16px;
+        border-radius: 8px;
+        color: var(--ink-muted);
+        font-size: 23px;
+        font-weight: 700;
+      }
+
+      .nav-item.active {
+        background: rgba(0, 117, 222, 0.1);
+        color: var(--primary);
+      }
+
+      .form-area {
+        padding: 32px;
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+      }
+
+      .form-control {
+        min-height: 112px;
+        padding: 18px;
+        border: 1px solid #dddddd;
+        border-radius: 4px;
+        background: var(--surface);
+      }
+
+      .form-control label {
+        display: block;
+        color: var(--ink-muted);
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 14px;
+      }
+
+      .field-value {
+        color: var(--ink);
+        font-size: 25px;
+        font-weight: 700;
+      }
+
+      .upload-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+        margin-top: 18px;
+      }
+
+      .upload-box {
+        min-height: 116px;
+        padding: 20px;
+        border: 2px dashed #d6d3d1;
+        border-radius: 8px;
+        background: #fcfbfb;
+        color: var(--ink-muted);
+        font-size: 23px;
+        font-weight: 700;
+      }
+
+      /* === SLIDE 6: FULL CODE TAB === */
+      .tab-app {
+        display: grid;
+        grid-template-columns: 0.82fr 1fr;
+        gap: 26px;
+        min-height: 626px;
+        margin-top: 42px;
+      }
+
+      .document-preview {
+        padding: 28px;
+        background: #f0efee;
+      }
+
+      .paper {
+        height: 505px;
+        margin-top: 22px;
+        padding: 34px;
+        border: 1px solid #dedbd8;
+        border-radius: 8px;
+        background: #ffffff;
+        box-shadow: var(--shadow-soft);
+      }
+
+      .paper-line {
+        height: 13px;
+        margin-top: 20px;
+        border-radius: 999px;
+        background: #d8d5d1;
+      }
+
+      .paper-line.short {
+        width: 58%;
+      }
+      .paper-line.mid {
+        width: 76%;
+      }
+      .paper-table {
+        display: grid;
+        grid-template-columns: 1.5fr 0.6fr;
+        gap: 10px;
+        margin-top: 44px;
+      }
+
+      .paper-cell {
+        height: 44px;
+        border: 1px solid #dfdcd8;
+        border-radius: 4px;
+        background: #faf9f8;
+      }
+
+      .review-panel {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        padding: 30px;
+      }
+
+      .review-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+      }
+
+      .review-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+      }
+
+      .validation-list {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-top: 20px;
+      }
+
+      .check-chip {
+        border-radius: 8px;
+        background: #f2faf4;
+        color: #116329;
+        font-size: 20px;
+        font-weight: 800;
+        padding: 15px;
+        text-align: center;
+      }
+
+      /* === SLIDE 7: COMPARISON === */
+      .comparison-table {
+        display: grid;
+        grid-template-columns: 1.05fr repeat(3, 1fr);
+        margin-top: 44px;
+        overflow: hidden;
+        border: 1px solid var(--hairline);
+        border-radius: 12px;
+        background: var(--surface);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .cell {
+        min-height: 106px;
+        padding: 22px 24px;
+        border-right: 1px solid var(--hairline);
+        border-bottom: 1px solid var(--hairline);
+        color: var(--ink-soft);
+        font-size: 22px;
+        line-height: 1.25;
+      }
+
+      .cell:nth-child(4n) {
+        border-right: 0;
+      }
+
+      .cell.header {
+        min-height: 76px;
+        background: #fbfaf9;
+        color: var(--ink);
+        font-size: 24px;
+        font-weight: 800;
+      }
+
+      .cell.metric {
+        color: var(--ink-muted);
+        font-weight: 800;
+      }
+
+      .cell.good {
+        color: #0f6b2b;
+        background: #f2faf4;
+      }
+
+      .cell.watch {
+        color: #793400;
+        background: #fff7ed;
+      }
+
+      /* === SLIDE 8: ARCHITECTURE === */
+      .architecture-layout {
+        display: grid;
+        grid-template-columns: 1.07fr 0.55fr;
+        gap: 42px;
+        margin-top: 34px;
+        align-items: stretch;
+      }
+
+      .architecture-image {
+        display: grid;
+        place-items: center;
+        min-height: 586px;
+        padding: 24px;
+      }
+
+      .architecture-image img {
+        width: 100%;
+        height: auto;
+        border-radius: 8px;
+      }
+
+      .architecture-notes {
+        display: grid;
+        align-content: start;
+        gap: 14px;
+      }
+
+      .arch-card {
+        padding: 22px 24px;
+      }
+
+      .arch-card h3 {
+        font-size: 26px;
+        margin-bottom: 10px;
+      }
+
+      .arch-card p {
+        font-size: 21px;
+      }
+
+      .slide[aria-label="System Architecture"] h2 {
+        font-size: 66px;
+        max-width: 1190px;
+      }
+
+      .slide[aria-label="System Architecture"] .page-number {
+        top: 104px;
+        right: 104px;
+        bottom: auto;
+      }
+
+      /* === SLIDE 9: NEXT STEPS === */
+      .timeline {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 22px;
+        margin-top: 54px;
+      }
+
+      .timeline-card {
+        min-height: 524px;
+        padding: 30px;
+      }
+
+      .timeline-date {
+        display: inline-flex;
+        margin-bottom: 30px;
+        border-radius: 999px;
+        background: rgba(0, 117, 222, 0.1);
+        color: var(--primary);
+        font-size: 20px;
+        font-weight: 800;
+        padding: 10px 14px;
+      }
+
+      .timeline-card h3 {
+        margin-bottom: 20px;
+      }
+
+      .timeline-card li {
+        font-size: 24px;
+        padding-left: 28px;
+      }
+
+      .timeline-card li::before {
+        top: 13px;
+        width: 8px;
+        height: 8px;
+      }
+
+      /* === SLIDE 10: Q AND A === */
+      .qa-slide {
+        display: grid;
+        align-content: center;
+      }
+
+      .qa-wrap {
+        max-width: 1280px;
+      }
+
+      .qa-wrap h2 {
+        font-size: 160px;
+        line-height: 0.92;
+        margin-bottom: 42px;
+      }
+
+      .qa-wrap .lead {
+        max-width: 980px;
+      }
+
+      .qa-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 54px;
+      }
+
+      /* === OUTSIDE-STAGE CONTROLS === */
+      .deck-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.72);
+        backdrop-filter: blur(10px);
+        color: #ffffff;
+        font-family: var(--font-body);
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
+        transform: translateX(-50%) translateY(8px);
+      }
+
+      .controls-hotzone {
+        position: fixed;
+        left: 50%;
+        bottom: 0;
+        width: 250px;
+        height: 108px;
+        transform: translateX(-50%);
+        z-index: 999;
+      }
+
+      .controls-hotzone:hover + .deck-controls,
+      .deck-controls:hover,
+      .deck-controls:focus-within {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      .deck-controls button,
+      .edit-toggle,
+      .edit-panel button {
+        border: 0;
+        border-radius: 999px;
+        background: #ffffff;
+        color: #111111;
+        font: 700 14px/1 var(--font-body);
+        cursor: pointer;
+      }
+
+      .deck-controls button {
+        width: 38px;
+        height: 38px;
+      }
+
+      .deck-controls span {
+        min-width: 70px;
+        text-align: center;
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      .edit-hotzone {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 86px;
+        height: 86px;
+        z-index: 10000;
+      }
+
+      .edit-toggle {
+        position: fixed;
+        top: 18px;
+        left: 18px;
+        z-index: 10001;
+        padding: 13px 16px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+
+      .edit-toggle.show,
+      .edit-toggle.active {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .edit-panel {
+        position: fixed;
+        top: 18px;
+        left: 92px;
+        z-index: 10001;
+        display: none;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.72);
+        backdrop-filter: blur(10px);
+      }
+
+      .edit-panel.active {
+        display: flex;
+      }
+
+      .edit-panel button {
+        padding: 13px 16px;
+      }
+
+      .editing [contenteditable="true"] {
+        outline: 2px dashed rgba(0, 117, 222, 0.45);
+        outline-offset: 4px;
+        cursor: text;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="deck-viewport">
+      <main class="deck-stage" id="deckStage">
+        <section
+          class="slide hero-slide active visible"
+          aria-label="Business Problem"
+        >
+          <span
+            class="sticker sky"
+            style="width: 88px; height: 88px; right: 170px; top: 108px"
+          ></span>
+          <span
+            class="sticker purple round"
+            style="width: 66px; height: 66px; right: 402px; top: 212px"
+          ></span>
+          <span
+            class="sticker pink"
+            style="width: 54px; height: 54px; right: 268px; bottom: 190px"
+          ></span>
+          <span
+            class="sticker orange round"
+            style="width: 34px; height: 34px; left: 1020px; bottom: 236px"
+          ></span>
+          <div class="slide-kicker reveal">Goods Receipt POC</div>
+          <div class="hero-layout">
+            <div>
+              <h1 class="reveal">Business Problem</h1>
+              <p class="lead reveal" style="margin-top: 34px">
+                Manual GR submission still begins with paper documents and ends with
+                manual keying into a system.
+              </p>
+            </div>
+            <div class="hero-panel card reveal">
+              <h3>Current pain</h3>
+              <ul>
+                <li>
+                  Delivery Orders and completion certificates are submitted
+                  manually
+                </li>
+                <li>
+                  PO number, vendor, date, items, and quantities need human
+                  review
+                </li>
+                <li>
+                  Slow and labour-intensive process
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div class="page-number">01 / 10</div>
+        </section>
+
+        <section class="slide" aria-label="Project Objectives">
+          <span
+            class="sticker teal round"
+            style="width: 74px; height: 74px; right: 124px; top: 126px"
+          ></span>
+          <span
+            class="sticker purple"
+            style="width: 46px; height: 46px; right: 258px; top: 196px"
+          ></span>
+          <div class="slide-kicker reveal">Project Objectives</div>
+          <h2 class="reveal">
+            Demonstrate the use case across three Teams delivery modes.
+          </h2>
+          <div class="objective-grid">
+            <div class="objective-card card reveal">
+              <div class="num">01</div>
+              <h3>Extraction</h3>
+              <p>
+                Use Amazon Bedrock with Claude 3.5 Sonnet to extract core DO
+                fields.
+              </p>
+            </div>
+            <div class="objective-card card reveal">
+              <div class="num">02</div>
+              <h3>Review</h3>
+              <p>Pre-populate editable GR fields before submission.</p>
+            </div>
+            <div class="objective-card card reveal">
+              <div class="num">03</div>
+              <h3>Bundle</h3>
+              <p>Store the DO and supporting documents with the GR record.</p>
+            </div>
+            <div class="objective-card card reveal">
+              <div class="num">04</div>
+              <h3>Compare</h3>
+              <p>
+                Assess speed, UX depth, integration effort, and maintainability.
+              </p>
+            </div>
+          </div>
+          <div class="deadline-strip reveal">
+            <p>Delivery target</p>
+            <strong>17 Jul 2026</strong>
+          </div>
+          <div class="page-number">02 / 10</div>
+        </section>
+
+        <section class="slide" aria-label="Core User Flow">
+          <span
+            class="sticker orange"
+            style="width: 58px; height: 58px; right: 148px; top: 162px"
+          ></span>
+          <div class="slide-kicker reveal">Core User Flow</div>
+          <h2 class="reveal">
+            Capture the document, confirm the fields, submit the GR.
+          </h2>
+          <div class="flow-track">
+            <div class="flow-step reveal">
+              <div class="step-index">1</div>
+              <div class="step-title">Upload DO</div>
+              <div class="step-copy">
+                User uploads or photographs a Delivery Order in Teams
+              </div>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">2</div>
+              <div class="step-title">Extract fields</div>
+              <div class="step-copy">
+                Claude 3.5 Sonnet on Bedrock extracts the delivery date, PO, vendor, items,
+                quantities
+              </div>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">3</div>
+              <div class="step-title">Pre-fill GR</div>
+              <div class="step-copy">
+                The app populates the fields with the extracted information, creating an editable draft Goods Receipt
+              </div>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">4</div>
+              <div class="step-title">Review</div>
+              <div class="step-copy">
+                User reviews and amends the extracted fields
+              </div>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">5</div>
+              <div class="step-title">Attach docs</div>
+              <div class="step-copy">
+                User attaches any supporting documents (e.g. packing list, invoice)
+              </div>
+            </div>
+            <div class="flow-step reveal">
+              <div class="step-index">6</div>
+              <div class="step-title">Submit</div>
+              <div class="step-copy">
+                User submits the completed GR with all attachments
+              </div>
+            </div>
+          </div>
+          <div class="page-number">03 / 10</div>
+        </section>
+
+        <section class="slide" aria-label="Chatbot Mode">
+          <span
+            class="sticker purple round"
+            style="width: 72px; height: 72px; right: 158px; top: 128px"
+          ></span>
+          <div class="slide-kicker reveal">Chatbot</div>
+          <h2 class="reveal">
+            Conversational capture plus an adaptive-card review.
+          </h2>
+          <div class="mode-layout">
+            <div class="chat-window card reveal">
+              <div class="chat-top">
+                <span class="teams-mark">T</span
+                ><span>Teams bot conversation</span>
+              </div>
+              <div class="bubble user">Uploaded: delivery_order_june.pdf</div>
+              <div class="bubble">
+                I found 1 PO, 1 vendor, and 3 line items. Please review the
+                extracted fields.
+              </div>
+              <div class="adaptive-card">
+                <h3>Review extracted GR</h3>
+                <div class="mini-field">
+                  <span class="mini-label">PO number</span
+                  ><span>PO-2026-1048</span>
+                </div>
+                <div class="mini-field">
+                  <span class="mini-label">Vendor</span
+                  ><span>Sample Vendor</span>
+                </div>
+                <div class="mini-field">
+                  <span class="mini-label">Date</span><span>24 Jun 2026</span>
+                </div>
+                <div class="mini-field">
+                  <span class="mini-label">Items</span
+                  ><span>3 editable rows</span>
+                </div>
+              </div>
+            </div>
+            <div class="mode-notes">
+              <div class="note-card card reveal">
+                <h3>Strengths</h3>
+                <ul>
+                  <li>Natural chat-based DO upload and confirmation</li>
+                  <li>Adaptive Cards support quick field review/editing</li>
+                  <li>Provides guidance for users</li>
+                </ul>
+              </div>
+              <div class="note-card card reveal">
+                <h3>Weaknesses</h3>
+                <ul>
+                  <li>Limited space for complex line-item edits</li>
+                  <li>Less suited for rich validation or document review</li>
+                  <li>Customisation may be limited</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="page-number">04 / 10</div>
+        </section>
+
+        <section class="slide" aria-label="Low-code Mode">
+          <span
+            class="sticker green round"
+            style="width: 66px; height: 66px; right: 142px; top: 150px"
+          ></span>
+          <div class="slide-kicker reveal">Low-code</div>
+          <h2 class="reveal">A form-first path inside Teams.</h2>
+          <div class="mode-layout">
+            <div class="app-shell card reveal">
+              <aside class="app-nav">
+                <div class="nav-item active">New GR</div>
+                <div class="nav-item">Drafts</div>
+                <div class="nav-item">Submitted</div>
+              </aside>
+              <div class="form-area">
+                <div class="form-grid">
+                  <div class="form-control">
+                    <label>PO number</label>
+                    <div class="field-value">PO-2026-1048</div>
+                  </div>
+                  <div class="form-control">
+                    <label>Vendor</label>
+                    <div class="field-value">Sample Vendor</div>
+                  </div>
+                  <div class="form-control">
+                    <label>Delivery date</label>
+                    <div class="field-value">23 Jun 2026</div>
+                  </div>
+                  <div class="form-control">
+                    <label>Origin</label>
+                    <div class="field-value">Low-code</div>
+                  </div>
+                </div>
+                <div class="upload-row">
+                  <div class="upload-box">
+                    Delivery Order upload<br /><span class="tiny"
+                      >PNG, JPEG, PDF</span
+                    >
+                  </div>
+                  <div class="upload-box">
+                    Supporting attachments<br /><span class="tiny"
+                      >Packing list or invoice</span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="mode-notes">
+              <div class="note-card card reveal">
+                <h3>Strengths</h3>
+                <ul>
+                  <li>Fastest build for simple submission</li>
+                  <li>Good fit for forms, edits, and uploads</li>
+                  <li>Easy business-user review flow</li>
+                </ul>
+              </div>
+              <div class="note-card card reveal">
+                <h3>Weaknesses</h3>
+                <ul>
+                  <li>AWS/Bedrock may need connector work</li>
+                  <li>Less flexible custom UX and validation</li>
+                  <li>File handling can be constrained</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="page-number">05 / 10</div>
+        </section>
+
+        <section class="slide" aria-label="Full-code Tab App">
+          <span
+            class="sticker sky"
+            style="width: 70px; height: 70px; right: 162px; top: 122px"
+          ></span>
+          <div class="slide-kicker reveal">Full-code Tab App</div>
+          <h2 class="reveal">
+            React + FastAPI = richest review and validation experience.
+          </h2>
+          <div class="mode-layout">
+            <div class="document-preview card reveal">
+              <div class="badge">Delivery Order preview</div>
+              <div class="paper">
+                <div class="paper-line short"></div>
+                <div class="paper-line mid"></div>
+                <div class="paper-line"></div>
+                <div class="paper-table">
+                  <div class="paper-cell"></div>
+                  <div class="paper-cell"></div>
+                  <div class="paper-cell"></div>
+                  <div class="paper-cell"></div>
+                  <div class="paper-cell"></div>
+                  <div class="paper-cell"></div>
+                  <div class="paper-cell"></div>
+                  <div class="paper-cell"></div>
+                </div>
+              </div>
+            </div>
+            <div class="mode-notes">
+              <div class="note-card card reveal">
+                <h3>Strengths</h3>
+                <ul>
+                  <li>Best UX for document review and line-item editing</li>
+                  <li>Strongest AWS/S3/Bedrock control</li>
+                  <li>Most scalable toward production</li>
+                </ul>
+              </div>
+              <div class="note-card card reveal">
+                <h3>Weaknesses</h3>
+                <ul>
+                  <li>Highest build effort</li>
+                  <li>More auth, hosting, backend, and deployment setup</li>
+                  <li>Needs stronger engineering ownership</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="page-number">06 / 10</div>
+        </section>
+
+        <section class="slide" aria-label="Comparison Between Modes">
+          <span
+            class="sticker pink"
+            style="width: 56px; height: 56px; right: 144px; top: 146px"
+          ></span>
+          <div class="slide-kicker reveal">Comparison Between Modes</div>
+          <h2 class="reveal">
+            Mode depends on where the POC needs to prove value.
+          </h2>
+          <div class="comparison-table reveal">
+            <div class="cell header">Dimension</div>
+            <div class="cell header">Chatbot</div>
+            <div class="cell header">Low-code</div>
+            <div class="cell header">Full-code tab</div>
+
+            <div class="cell metric">Build speed</div>
+            <div class="cell good">Fast</div>
+            <div class="cell good">Fast for form-first workflow</div>
+            <div class="cell watch">More setup, more control</div>
+
+            <div class="cell metric">User experience</div>
+            <div class="cell">Best for guided steps</div>
+            <div class="cell">Best for familiar-looking forms</div>
+            <div class="cell good">
+              Best for preview, validation, and line items
+            </div>
+
+            <div class="cell metric">Customisation</div>
+            <div class="cell watch">Limited</div>
+            <div class="cell watch">Limited</div>
+            <div class="cell good">Full</div>
+
+            <div class="cell metric">Integration effort</div>
+            <div class="cell">Bot + FastAPI backend</div>
+            <div class="cell watch">Low-code UI + custom connectors</div>
+            <div class="cell">React + FastAPI backend</div>
+
+            <div class="cell metric">Maintainability</div>
+            <div class="cell">Medium</div>
+            <div class="cell good">Low</div>
+            <div class="cell watch">High</div>
+          </div>
+          <div class="page-number">07 / 10</div>
+        </section>
+
+        <section class="slide" aria-label="System Architecture">
+          <span
+            class="sticker orange round"
+            style="width: 58px; height: 58px; right: 128px; top: 136px"
+          ></span>
+          <div class="slide-kicker reveal">System Architecture</div>
+          <h2 class="reveal">
+            Teams hosts the experience. AWS runs extraction, storage, and
+            persistence.
+          </h2>
+          <div class="architecture-layout">
+            <div class="architecture-image card reveal">
+              <img
+                src="System Design.png"
+                alt="Goods Receipt POC AWS architecture diagram"
+              />
+            </div>
+            <div class="architecture-notes">
+              <div class="arch-card card reveal">
+                <h3>Entry points</h3>
+                <p>
+                  Chatbot, low-code app, and full-code tab all call the same
+                  backend surface.
+                </p>
+              </div>
+              <div class="arch-card card reveal">
+                <h3>Storage and model</h3>
+                <p>
+                  DO files use <strong>dos/{gr_id}/</strong>; attachments use
+                  <strong>attachments/{gr_id}/</strong>.
+                  <strong>goods_receipt</strong> owns line items and attachment
+                  records.
+                </p>
+              </div>
+              <div class="arch-card card reveal">
+                <h3>Security baseline</h3>
+                <p>
+                  Server-side MIME checks, DB secrets in Secrets Manager, and
+                  IAM scoped to S3 prefixes.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="page-number">08 / 10</div>
+        </section>
+
+        <section class="slide" aria-label="Next Steps">
+          <span
+            class="sticker teal"
+            style="width: 64px; height: 64px; right: 150px; top: 130px"
+          ></span>
+          <div class="slide-kicker reveal">Next Steps</div>
+          <h2 class="reveal">
+            Finish backend + perform comparison
+          </h2>
+          <div class="timeline">
+            <div class="timeline-card card reveal">
+              <div class="timeline-date">1 May - 1 Jun 2026</div>
+              <h3>Build the shared backbone</h3>
+              <ul>
+                <li>Finalise sample DO set</li>
+                <li>Lock extraction prompt and output shape</li>
+                <li>Implement S3 key and DB persistence baseline</li>
+              </ul>
+            </div>
+            <div class="timeline-card card reveal">
+              <div class="timeline-date">1 - 24 Jun 2026</div>
+              <h3>Finish three POC modes</h3>
+              <ul>
+                <li>Chatbot upload and adaptive-card review</li>
+                <li>Power Apps embedded form workflow</li>
+                <li>React/FastAPI tab with richer validation</li>
+              </ul>
+            </div>
+            <div class="timeline-card card reveal">
+              <div class="timeline-date">24 Jun - 31 Jul 2026</div>
+              <h3>Compare and decide the production direction</h3>
+              <ul>
+                <li>Compare UX and delivery effort</li>
+                <li>Document risks and missing decisions</li>
+                <li>Confirm whether approval workflow remains out of scope</li>
+              </ul>
+            </div>
+          </div>
+          <div class="page-number">09 / 10</div>
+        </section>
+
+        <section class="slide qa-slide" aria-label="Q and A">
+          <span
+            class="sticker sky"
+            style="width: 104px; height: 104px; right: 212px; top: 174px"
+          ></span>
+          <span
+            class="sticker purple round"
+            style="width: 82px; height: 82px; right: 406px; top: 272px"
+          ></span>
+          <span
+            class="sticker orange"
+            style="width: 56px; height: 56px; right: 300px; bottom: 236px"
+          ></span>
+          <span
+            class="sticker green round"
+            style="width: 42px; height: 42px; left: 1050px; bottom: 214px"
+          ></span>
+          <div class="qa-wrap">
+            <div class="slide-kicker reveal">Q & A</div>
+            <h2 class="reveal">Questions?</h2>
+            <p class="lead reveal">
+              Use the demo to test the real trade-off: fastest POC, clearest
+              user flow, or strongest long-term Teams experience.
+            </p>
+          </div>
+          <div class="page-number">10 / 10</div>
+        </section>
+      </main>
+    </div>
+
+    <div class="controls-hotzone" aria-hidden="true"></div>
+    <nav class="deck-controls" aria-label="Presentation controls">
+      <button type="button" id="prevSlide" aria-label="Previous slide">
+        &lt;
+      </button>
+      <span id="slideCounter">1 / 10</span>
+      <button type="button" id="nextSlide" aria-label="Next slide">&gt;</button>
+    </nav>
+
+    <div class="edit-hotzone" aria-hidden="true"></div>
+    <button class="edit-toggle" id="editToggle" type="button" title="Edit mode">
+      Edit
+    </button>
+    <div class="edit-panel" id="editPanel" aria-label="Editing controls">
+      <button type="button" id="saveEdits">Save</button>
+      <button type="button" id="downloadDeck">Download</button>
+    </div>
+
+    <script>
+      /* === SLIDE PRESENTATION CONTROLLER === */
+      class SlidePresentation {
+        constructor() {
+          this.stage = document.getElementById("deckStage");
+          this.slides = Array.from(document.querySelectorAll(".slide"));
+          this.currentSlide = 0;
+          this.counter = document.getElementById("slideCounter");
+          this.wheelLock = false;
+          this.setupStageScale();
+          this.setupKeyboardNav();
+          this.setupTouchNav();
+          this.setupWheelNav();
+          this.setupButtons();
+          const hashSlide = parseInt(window.location.hash.replace("#", ""), 10);
+          this.showSlide(Number.isFinite(hashSlide) ? hashSlide - 1 : 0);
+        }
+
+        setupStageScale() {
+          const scale = () => {
+            const factor = Math.min(
+              window.innerWidth / 1920,
+              window.innerHeight / 1080,
+            );
+            const x = (window.innerWidth - 1920 * factor) / 2;
+            const y = (window.innerHeight - 1080 * factor) / 2;
+            this.stage.style.transform = `translate(${x}px, ${y}px) scale(${factor})`;
+          };
+          scale();
+          window.addEventListener("resize", scale);
+        }
+
+        setupKeyboardNav() {
+          document.addEventListener("keydown", (event) => {
+            if (
+              event.target &&
+              event.target.getAttribute("contenteditable") === "true"
+            )
+              return;
+            if (["ArrowRight", "PageDown", " "].includes(event.key)) {
+              event.preventDefault();
+              this.next();
+            }
+            if (["ArrowLeft", "PageUp"].includes(event.key)) {
+              event.preventDefault();
+              this.prev();
+            }
+            if (event.key === "Home") this.showSlide(0);
+            if (event.key === "End") this.showSlide(this.slides.length - 1);
+          });
+        }
+
+        setupTouchNav() {
+          let startX = 0;
+          let startY = 0;
+          window.addEventListener(
+            "touchstart",
+            (event) => {
+              startX = event.changedTouches[0].clientX;
+              startY = event.changedTouches[0].clientY;
+            },
+            { passive: true },
+          );
+          window.addEventListener(
+            "touchend",
+            (event) => {
+              const dx = event.changedTouches[0].clientX - startX;
+              const dy = event.changedTouches[0].clientY - startY;
+              if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) {
+                dx < 0 ? this.next() : this.prev();
+              }
+            },
+            { passive: true },
+          );
+        }
+
+        setupWheelNav() {
+          window.addEventListener(
+            "wheel",
+            (event) => {
+              if (this.wheelLock || Math.abs(event.deltaY) < 30) return;
+              this.wheelLock = true;
+              event.deltaY > 0 ? this.next() : this.prev();
+              setTimeout(() => {
+                this.wheelLock = false;
+              }, 450);
+            },
+            { passive: true },
+          );
+        }
+
+        setupButtons() {
+          document
+            .getElementById("prevSlide")
+            .addEventListener("click", () => this.prev());
+          document
+            .getElementById("nextSlide")
+            .addEventListener("click", () => this.next());
+        }
+
+        showSlide(index) {
+          this.currentSlide = Math.max(
+            0,
+            Math.min(index, this.slides.length - 1),
+          );
+          this.slides.forEach((slide, i) => {
+            slide.classList.toggle("active", i === this.currentSlide);
+            slide.classList.toggle("visible", i === this.currentSlide);
+          });
+          this.counter.textContent = `${this.currentSlide + 1} / ${this.slides.length}`;
+          history.replaceState(null, "", `#${this.currentSlide + 1}`);
+        }
+
+        next() {
+          this.showSlide(this.currentSlide + 1);
+        }
+
+        prev() {
+          this.showSlide(this.currentSlide - 1);
+        }
+      }
+
+      /* === INLINE EDITING === */
+      class InlineEditor {
+        constructor() {
+          this.stage = document.getElementById("deckStage");
+          this.toggle = document.getElementById("editToggle");
+          this.panel = document.getElementById("editPanel");
+          this.storageKey = "gr-poc-demo-deck-edits";
+          this.isActive = false;
+          this.restore();
+          this.bind();
+        }
+
+        restore() {
+          const saved = localStorage.getItem(this.storageKey);
+          if (saved) this.stage.innerHTML = saved;
+        }
+
+        bind() {
+          this.toggle.addEventListener("click", () => this.toggleEditMode());
+          document
+            .getElementById("saveEdits")
+            .addEventListener("click", () => this.save());
+          document
+            .getElementById("downloadDeck")
+            .addEventListener("click", () => this.download());
+          document.addEventListener("keydown", (event) => {
+            const editingText =
+              event.target &&
+              event.target.getAttribute("contenteditable") === "true";
+            if ((event.key === "e" || event.key === "E") && !editingText)
+              this.toggleEditMode();
+            if (
+              (event.ctrlKey || event.metaKey) &&
+              event.key.toLowerCase() === "s"
+            ) {
+              event.preventDefault();
+              this.save();
+            }
+          });
+
+          const hotzone = document.querySelector(".edit-hotzone");
+          let hideTimeout = null;
+          const show = () => {
+            clearTimeout(hideTimeout);
+            this.toggle.classList.add("show");
+          };
+          const hide = () => {
+            hideTimeout = setTimeout(() => {
+              if (!this.isActive) this.toggle.classList.remove("show");
+            }, 400);
+          };
+          hotzone.addEventListener("mouseenter", show);
+          hotzone.addEventListener("mouseleave", hide);
+          hotzone.addEventListener("click", () => this.toggleEditMode());
+          this.toggle.addEventListener("mouseenter", show);
+          this.toggle.addEventListener("mouseleave", hide);
+        }
+
+        editableNodes() {
+          return this.stage.querySelectorAll(
+            "h1,h2,h3,p,li,.badge,.pill,.step-title,.step-copy,.field-value,.mini-label,.cell,.timeline-date",
+          );
+        }
+
+        toggleEditMode() {
+          this.isActive = !this.isActive;
+          document.body.classList.toggle("editing", this.isActive);
+          this.toggle.classList.toggle("active", this.isActive);
+          this.panel.classList.toggle("active", this.isActive);
+          this.editableNodes().forEach((node) => {
+            node.setAttribute(
+              "contenteditable",
+              this.isActive ? "true" : "false",
+            );
+          });
+          if (!this.isActive) this.save();
+        }
+
+        save() {
+          localStorage.setItem(this.storageKey, this.stage.innerHTML);
+          this.toggle.textContent = "Saved";
+          setTimeout(() => {
+            this.toggle.textContent = "Edit";
+          }, 900);
+        }
+
+        download() {
+          this.save();
+          const blob = new Blob(
+            ["<!DOCTYPE html>\n" + document.documentElement.outerHTML],
+            { type: "text/html" },
+          );
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "gr-poc-demo-deck-edited.html";
+          link.click();
+          URL.revokeObjectURL(link.href);
+        }
+      }
+
+      /* === BOOTSTRAP === */
+      const editor = new InlineEditor();
+      new SlidePresentation();
+    </script>
+  </body>
+</html>
