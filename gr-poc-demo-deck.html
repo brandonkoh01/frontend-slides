@@ -290,6 +290,14 @@
         max-width: 900px;
       }
 
+      .slide-subtitle {
+        max-width: 980px;
+        margin-top: 20px;
+        color: var(--ink-muted);
+        font-size: 31px;
+        line-height: 1.3;
+      }
+
       .muted {
         color: var(--ink-muted);
       }
@@ -582,6 +590,20 @@
         gap: 58px;
         margin-top: 42px;
         align-items: stretch;
+      }
+
+      .preview-shot {
+        display: flex;
+        align-items: flex-start;
+        overflow: hidden;
+        min-height: 560px;
+        padding: 0;
+      }
+
+      .preview-shot img {
+        display: block;
+        width: 100%;
+        height: auto;
       }
 
       .chat-window {
@@ -935,7 +957,7 @@
 
       .architecture-notes {
         display: grid;
-        align-content: start;
+        align-content: stretch;
         gap: 14px;
       }
 
@@ -1173,8 +1195,8 @@
             <div>
               <h1 class="reveal">Business Problem</h1>
               <p class="lead reveal" style="margin-top: 34px">
-                Manual GR submission still begins with paper documents and ends with
-                manual keying into a system.
+                Manual GR submission still begins with paper documents and ends
+                with manual keying into a system.
               </p>
             </div>
             <div class="hero-panel card reveal">
@@ -1188,9 +1210,7 @@
                   PO number, vendor, date, items, and quantities need human
                   review
                 </li>
-                <li>
-                  Slow and labour-intensive process
-                </li>
+                <li>Slow and labour-intensive process</li>
               </ul>
             </div>
           </div>
@@ -1206,10 +1226,11 @@
             class="sticker purple"
             style="width: 46px; height: 46px; right: 258px; top: 196px"
           ></span>
-          <div class="slide-kicker reveal">Project Objectives</div>
-          <h2 class="reveal">
+          <div class="slide-kicker reveal">POC Scope</div>
+          <h2 class="reveal">Project Objectives</h2>
+          <p class="slide-subtitle reveal">
             Demonstrate the use case across three Teams delivery modes.
-          </h2>
+          </p>
           <div class="objective-grid">
             <div class="objective-card card reveal">
               <div class="num">01</div>
@@ -1249,10 +1270,11 @@
             class="sticker orange"
             style="width: 58px; height: 58px; right: 148px; top: 162px"
           ></span>
-          <div class="slide-kicker reveal">Core User Flow</div>
-          <h2 class="reveal">
+          <div class="slide-kicker reveal">Workflow</div>
+          <h2 class="reveal">Core User Flow</h2>
+          <p class="slide-subtitle reveal">
             Capture the document, confirm the fields, submit the GR.
-          </h2>
+          </p>
           <div class="flow-track">
             <div class="flow-step reveal">
               <div class="step-index">1</div>
@@ -1265,15 +1287,16 @@
               <div class="step-index">2</div>
               <div class="step-title">Extract fields</div>
               <div class="step-copy">
-                Claude 3.5 Sonnet on Bedrock extracts the delivery date, PO, vendor, items,
-                quantities
+                Claude 3.5 Sonnet on Bedrock extracts the delivery date, PO,
+                vendor, items, quantities
               </div>
             </div>
             <div class="flow-step reveal">
               <div class="step-index">3</div>
               <div class="step-title">Pre-fill GR</div>
               <div class="step-copy">
-                The app populates the fields with the extracted information, creating an editable draft Goods Receipt
+                Populates GR fields with extracted information,
+                creating an editable draft Goods Receipt
               </div>
             </div>
             <div class="flow-step reveal">
@@ -1287,7 +1310,8 @@
               <div class="step-index">5</div>
               <div class="step-title">Attach docs</div>
               <div class="step-copy">
-                User attaches any supporting documents (e.g. packing list, invoice)
+                User attaches any supporting documents (e.g. packing list,
+                invoice)
               </div>
             </div>
             <div class="flow-step reveal">
@@ -1306,47 +1330,25 @@
             class="sticker purple round"
             style="width: 72px; height: 72px; right: 158px; top: 128px"
           ></span>
-          <div class="slide-kicker reveal">Chatbot</div>
-          <h2 class="reveal">
+          <div class="slide-kicker reveal">Delivery Mode 1</div>
+          <h2 class="reveal">Chatbot</h2>
+          <p class="slide-subtitle reveal">
             Conversational capture plus an adaptive-card review.
-          </h2>
+          </p>
           <div class="mode-layout">
-            <div class="chat-window card reveal">
-              <div class="chat-top">
-                <span class="teams-mark">T</span
-                ><span>Teams bot conversation</span>
-              </div>
-              <div class="bubble user">Uploaded: delivery_order_june.pdf</div>
-              <div class="bubble">
-                I found 1 PO, 1 vendor, and 3 line items. Please review the
-                extracted fields.
-              </div>
-              <div class="adaptive-card">
-                <h3>Review extracted GR</h3>
-                <div class="mini-field">
-                  <span class="mini-label">PO number</span
-                  ><span>PO-2026-1048</span>
-                </div>
-                <div class="mini-field">
-                  <span class="mini-label">Vendor</span
-                  ><span>Sample Vendor</span>
-                </div>
-                <div class="mini-field">
-                  <span class="mini-label">Date</span><span>24 Jun 2026</span>
-                </div>
-                <div class="mini-field">
-                  <span class="mini-label">Items</span
-                  ><span>3 editable rows</span>
-                </div>
-              </div>
+            <div class="preview-shot card reveal">
+              <img
+                src="Screenshots/Bot.png"
+                alt="Teams chatbot POC screenshot"
+              />
             </div>
             <div class="mode-notes">
               <div class="note-card card reveal">
                 <h3>Strengths</h3>
                 <ul>
                   <li>Natural chat-based DO upload and confirmation</li>
-                  <li>Adaptive Cards support quick field review/editing</li>
                   <li>Provides guidance for users</li>
+                  <li>Rich documentation and development toolkits</li>
                 </ul>
               </div>
               <div class="note-card card reveal">
@@ -1367,63 +1369,34 @@
             class="sticker green round"
             style="width: 66px; height: 66px; right: 142px; top: 150px"
           ></span>
-          <div class="slide-kicker reveal">Low-code</div>
-          <h2 class="reveal">A form-first path inside Teams.</h2>
+          <div class="slide-kicker reveal">Delivery Mode 2</div>
+          <h2 class="reveal">Low-code</h2>
+          <p class="slide-subtitle reveal">A form-first path inside Teams.</p>
           <div class="mode-layout">
-            <div class="app-shell card reveal">
-              <aside class="app-nav">
-                <div class="nav-item active">New GR</div>
-                <div class="nav-item">Drafts</div>
-                <div class="nav-item">Submitted</div>
-              </aside>
-              <div class="form-area">
-                <div class="form-grid">
-                  <div class="form-control">
-                    <label>PO number</label>
-                    <div class="field-value">PO-2026-1048</div>
-                  </div>
-                  <div class="form-control">
-                    <label>Vendor</label>
-                    <div class="field-value">Sample Vendor</div>
-                  </div>
-                  <div class="form-control">
-                    <label>Delivery date</label>
-                    <div class="field-value">23 Jun 2026</div>
-                  </div>
-                  <div class="form-control">
-                    <label>Origin</label>
-                    <div class="field-value">Low-code</div>
-                  </div>
-                </div>
-                <div class="upload-row">
-                  <div class="upload-box">
-                    Delivery Order upload<br /><span class="tiny"
-                      >PNG, JPEG, PDF</span
-                    >
-                  </div>
-                  <div class="upload-box">
-                    Supporting attachments<br /><span class="tiny"
-                      >Packing list or invoice</span
-                    >
-                  </div>
-                </div>
-              </div>
+            <div class="preview-shot card reveal">
+              <img
+                src="Screenshots/Low-code.png"
+                alt="Power Apps low-code POC screenshot"
+              />
             </div>
             <div class="mode-notes">
               <div class="note-card card reveal">
                 <h3>Strengths</h3>
                 <ul>
-                  <li>Fastest build for simple submission</li>
-                  <li>Good fit for forms, edits, and uploads</li>
-                  <li>Easy business-user review flow</li>
+                  <li>Familiar-looking interface</li>
+                  <li>Easy to use for non-technical users</li>
                 </ul>
               </div>
               <div class="note-card card reveal">
                 <h3>Weaknesses</h3>
                 <ul>
-                  <li>AWS/Bedrock may need connector work</li>
+                  <li>AWS integration requires custom connectors</li>
                   <li>Less flexible custom UX and validation</li>
-                  <li>File handling can be constrained</li>
+                  <li>Experienced developers may experience more friction</li>
+                  <li>
+                    Microsoft restricts attachment uploads to SharePoint and
+                    Microsoft Dataverse
+                  </li>
                 </ul>
               </div>
             </div>
@@ -1436,36 +1409,26 @@
             class="sticker sky"
             style="width: 70px; height: 70px; right: 162px; top: 122px"
           ></span>
-          <div class="slide-kicker reveal">Full-code Tab App</div>
-          <h2 class="reveal">
-            React + FastAPI = richest review and validation experience.
-          </h2>
+          <div class="slide-kicker reveal">Delivery Mode 3</div>
+          <h2 class="reveal">Full-code Tab App</h2>
+          <p class="slide-subtitle reveal">
+            Richest review and validation experience.
+          </p>
           <div class="mode-layout">
-            <div class="document-preview card reveal">
-              <div class="badge">Delivery Order preview</div>
-              <div class="paper">
-                <div class="paper-line short"></div>
-                <div class="paper-line mid"></div>
-                <div class="paper-line"></div>
-                <div class="paper-table">
-                  <div class="paper-cell"></div>
-                  <div class="paper-cell"></div>
-                  <div class="paper-cell"></div>
-                  <div class="paper-cell"></div>
-                  <div class="paper-cell"></div>
-                  <div class="paper-cell"></div>
-                  <div class="paper-cell"></div>
-                  <div class="paper-cell"></div>
-                </div>
-              </div>
+            <div class="preview-shot card reveal">
+              <img
+                src="Screenshots/Full-code.png"
+                alt="Full-code Teams tab POC screenshot"
+              />
             </div>
             <div class="mode-notes">
               <div class="note-card card reveal">
                 <h3>Strengths</h3>
                 <ul>
                   <li>Best UX for document review and line-item editing</li>
-                  <li>Strongest AWS/S3/Bedrock control</li>
-                  <li>Most scalable toward production</li>
+                  <li>Easiest to integrate with AWS through SDKs</li>
+                  <li>Virtually unlimited customisation options</li>
+                  <li>Documentation is aplenty</li>
                 </ul>
               </div>
               <div class="note-card card reveal">
@@ -1473,7 +1436,6 @@
                 <ul>
                   <li>Highest build effort</li>
                   <li>More auth, hosting, backend, and deployment setup</li>
-                  <li>Needs stronger engineering ownership</li>
                 </ul>
               </div>
             </div>
@@ -1486,10 +1448,11 @@
             class="sticker pink"
             style="width: 56px; height: 56px; right: 144px; top: 146px"
           ></span>
-          <div class="slide-kicker reveal">Comparison Between Modes</div>
-          <h2 class="reveal">
+          <div class="slide-kicker reveal">Evaluation</div>
+          <h2 class="reveal">Comparison Between Modes</h2>
+          <p class="slide-subtitle reveal">
             Mode depends on where the POC needs to prove value.
-          </h2>
+          </p>
           <div class="comparison-table reveal">
             <div class="cell header">Dimension</div>
             <div class="cell header">Chatbot</div>
@@ -1531,11 +1494,11 @@
             class="sticker orange round"
             style="width: 58px; height: 58px; right: 128px; top: 136px"
           ></span>
-          <div class="slide-kicker reveal">System Architecture</div>
-          <h2 class="reveal">
-            Teams hosts the experience. AWS runs extraction, storage, and
-            persistence.
-          </h2>
+          <div class="slide-kicker reveal">Architecture</div>
+          <h2 class="reveal">System Architecture</h2>
+          <p class="slide-subtitle reveal">
+            Teams hosts the experience. AWS runs extraction and persistence.
+          </p>
           <div class="architecture-layout">
             <div class="architecture-image card reveal">
               <img
@@ -1548,16 +1511,13 @@
                 <h3>Entry points</h3>
                 <p>
                   Chatbot, low-code app, and full-code tab all call the same
-                  backend surface.
+                  backend hosted on AWS.
                 </p>
               </div>
               <div class="arch-card card reveal">
                 <h3>Storage and model</h3>
                 <p>
-                  DO files use <strong>dos/{gr_id}/</strong>; attachments use
-                  <strong>attachments/{gr_id}/</strong>.
-                  <strong>goods_receipt</strong> owns line items and attachment
-                  records.
+                  S3 for DOs and attachments, RDS PostgreSQL to store records, and Claude 3.5 Sonnet on Bedrock for extraction.
                 </p>
               </div>
               <div class="arch-card card reveal">
@@ -1577,36 +1537,37 @@
             class="sticker teal"
             style="width: 64px; height: 64px; right: 150px; top: 130px"
           ></span>
-          <div class="slide-kicker reveal">Next Steps</div>
-          <h2 class="reveal">
-            Finish backend + perform comparison
-          </h2>
+          <div class="slide-kicker reveal">Execution</div>
+          <h2 class="reveal">Next Steps</h2>
+          <p class="slide-subtitle reveal">
+            Build backend, integrate frontend POCs, then compare.
+          </p>
           <div class="timeline">
             <div class="timeline-card card reveal">
-              <div class="timeline-date">1 May - 1 Jun 2026</div>
-              <h3>Build the shared backbone</h3>
+              <div class="timeline-date">Step 1</div>
+              <h3>Build backend</h3>
               <ul>
-                <li>Finalise sample DO set</li>
-                <li>Lock extraction prompt and output shape</li>
-                <li>Implement S3 key and DB persistence baseline</li>
+                <li>Microservices architecture</li>
+                <li>Data extraction</li>
+                <li>Store DOs, attachments, and GR records</li>
               </ul>
             </div>
             <div class="timeline-card card reveal">
-              <div class="timeline-date">1 - 24 Jun 2026</div>
-              <h3>Finish three POC modes</h3>
+              <div class="timeline-date">Step 2</div>
+              <h3>Integrate frontend POCs</h3>
               <ul>
-                <li>Chatbot upload and adaptive-card review</li>
-                <li>Power Apps embedded form workflow</li>
-                <li>React/FastAPI tab with richer validation</li>
+                <li>Connect chatbot, Power Apps, and React tab</li>
+                <li>Test upload, review, amend, and submit flow</li>
+                <li>One backend shared across modes</li>
               </ul>
             </div>
             <div class="timeline-card card reveal">
-              <div class="timeline-date">24 Jun - 31 Jul 2026</div>
-              <h3>Compare and decide the production direction</h3>
+              <div class="timeline-date">Step 3</div>
+              <h3>Perform comparison</h3>
               <ul>
-                <li>Compare UX and delivery effort</li>
+                <li>Compare UX, effort, and integration complexity</li>
                 <li>Document risks and missing decisions</li>
-                <li>Confirm whether approval workflow remains out of scope</li>
+                <li>Recommend production direction</li>
               </ul>
             </div>
           </div>
@@ -1632,11 +1593,7 @@
           ></span>
           <div class="qa-wrap">
             <div class="slide-kicker reveal">Q & A</div>
-            <h2 class="reveal">Questions?</h2>
-            <p class="lead reveal">
-              Use the demo to test the real trade-off: fastest POC, clearest
-              user flow, or strongest long-term Teams experience.
-            </p>
+            <h2 class="reveal">Questions</h2>
           </div>
           <div class="page-number">10 / 10</div>
         </section>
